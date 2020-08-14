@@ -1,6 +1,11 @@
 # AWS IoT Playground
 
-A project to play with virtual devices and learn different more about AWS IoT features such as device provisioning, device management, and security.
+A project to play with virtual devices and learn more about AWS IoT features such as device provisioning, device management, and security.
+
+![Alt text](docs/images/virtual-dev-01.png "Virtual Device")
+
+![Alt text](docs/images/virtual-dev-02.png "Virtual Device")
+
 
 # Install the Required Infrastructure
 

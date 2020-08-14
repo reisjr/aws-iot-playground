@@ -74,7 +74,7 @@ class IotPlaygroundStack(core.Stack):
             self, "DockerBuild",
             project_name=f"{props['namespace']}-Docker-Build",
             build_spec=aws_codebuild.BuildSpec.from_source_filename(
-                filename='docker/docker_build_buildspec.yml'),
+                filename='virtual-device/docker-build-buildspec.yml'),
                 environment=aws_codebuild.BuildEnvironment(
                 privileged=True,
             ),
