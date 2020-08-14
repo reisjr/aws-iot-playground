@@ -1,0 +1,109 @@
+{
+    "resource": "/",
+    "path": "/",
+    "httpMethod": "POST",
+    "headers": {
+        "Accept": "*/*",
+        "CloudFront-Forwarded-Proto": "https",
+        "CloudFront-Is-Desktop-Viewer": "true",
+        "CloudFront-Is-Mobile-Viewer": "false",
+        "CloudFront-Is-SmartTV-Viewer": "false",
+        "CloudFront-Is-Tablet-Viewer": "false",
+        "CloudFront-Viewer-Country": "BR",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Host": "3yxl4tkbr8.execute-api.us-east-1.amazonaws.com",
+        "User-Agent": "curl/7.54.0",
+        "Via": "1.1 500f59fe7e67ec25b5c0692f11203995.cloudfront.net (CloudFront)",
+        "X-Amz-Cf-Id": "-wbu9YlCOIPVPpbAddNqD1Wm3QPKCu7qDoPfFOHeyvY6s1sSL5h3bg==",
+        "X-Amzn-Trace-Id": "Root=1-5dcf3272-a07259d2bb4f689437ee33da",
+        "X-Forwarded-For": "201.93.206.143, 130.176.40.160",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https"
+    },
+    "multiValueHeaders": {
+        "Accept": [
+            "*/*"
+        ],
+        "CloudFront-Forwarded-Proto": [
+            "https"
+        ],
+        "CloudFront-Is-Desktop-Viewer": [
+            "true"
+        ],
+        "CloudFront-Is-Mobile-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-SmartTV-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-Tablet-Viewer": [
+            "false"
+        ],
+        "CloudFront-Viewer-Country": [
+            "BR"
+        ],
+        "Content-Type": [
+            "application/x-www-form-urlencoded"
+        ],
+        "Host": [
+            "3yxl4tkbr8.execute-api.us-east-1.amazonaws.com"
+        ],
+        "User-Agent": [
+            "curl/7.54.0"
+        ],
+        "Via": [
+            "1.1 500f59fe7e67ec25b5c0692f11203995.cloudfront.net (CloudFront)"
+        ],
+        "X-Amz-Cf-Id": [
+            "-wbu9YlCOIPVPpbAddNqD1Wm3QPKCu7qDoPfFOHeyvY6s1sSL5h3bg=="
+        ],
+        "X-Amzn-Trace-Id": [
+            "Root=1-5dcf3272-a07259d2bb4f689437ee33da"
+        ],
+        "X-Forwarded-For": [
+            "201.93.206.143, 130.176.40.160"
+        ],
+        "X-Forwarded-Port": [
+            "443"
+        ],
+        "X-Forwarded-Proto": [
+            "https"
+        ]
+    },
+    "queryStringParameters": null,
+    "multiValueQueryStringParameters": null,
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "resourceId": "nw86dze47e",
+        "resourcePath": "/",
+        "httpMethod": "POST",
+        "extendedRequestId": "DOTR-Ge5IAMFotQ=",
+        "requestTime": "15/Nov/2019:23:19:14 +0000",
+        "path": "/prod/",
+        "accountId": "XXXXXXXXXXXX",
+        "protocol": "HTTP/1.1",
+        "stage": "prod",
+        "domainPrefix": "3yxl4tkbr8",
+        "requestTimeEpoch": 1573859954962,
+        "requestId": "6193cb6d-f946-4dee-8d76-8c3c1eb334b9",
+        "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "sourceIp": "201.93.206.143",
+            "principalOrgId": null,
+            "accessKey": null,
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "curl/7.54.0",
+            "user": null
+        },
+        "domainName": "3yxl4tkbr8.execute-api.us-east-1.amazonaws.com",
+        "apiId": "3yxl4tkbr8"
+    },
+    "body": "{ \"operation\":\"delete-device\", \"device-id\": \"dev-LHBS\" }",
+    "isBase64Encoded": false
+}

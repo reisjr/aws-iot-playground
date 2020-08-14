@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/dark.css')}}">
+    <title>AWS IoT Playground</title>
+  </head>
+  <body>
+    <table>
+        <tbody>
+        <tr>
+            <h1>AWS IoT Playground</h1>
+        </tr>
+        <tr>
+            <td>{{ message }}</td>
+        </tr>
+        <tr>
+            <td>Type: {{ type }}</td>
+        </tr>
+        <tr>
+            <td><img src="{{url_for('static', filename=img_file)}}"></td>
+        </tr>
+        <tr><td><a href="/config">Config</a></td></tr>
+        <tr><td><a href="/shadow">Shadow</a></td></tr>
+        <tr><td><a href="/endpoint">Endpoint</a></td></tr>
+        <tr><td><a href="/cert">Cert</a></td></tr>
+        <tr><td><a href="/log">Log</a></td></tr>
+        <tr>
+            <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
+        </tr>            
+        <tr>
+            <!--td id="infoLabel" align="center" style="position:relative; top:-15vh; height: 5vh; font-size:5vh; color:white; font-family:arial">Connected!</td-->
+        </tr>
+        </tbody>
+    </table>
+  </body>
+</html>

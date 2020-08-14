@@ -1,0 +1,9 @@
+FROM python:3.8
+RUN apt-get update -y
+RUN apt-get install -y python-pip python-dev build-essential supervisor
+RUN mkdir -p /var/log/supervisor
+COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+CMD ["/usr/bin/supervisord"]

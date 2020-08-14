@@ -1,0 +1,23 @@
+{
+    "violationEventTime": 1573786800000,
+    "thingName": "dev-IZWB",
+    "behavior": {
+      "criteria": {
+        "consecutiveDatapointsToClear": 1,
+        "value": {
+          "count": 10
+        },
+        "durationSeconds": 300,
+        "consecutiveDatapointsToAlarm": 1,
+        "comparisonOperator": "less-than"
+      },
+      "name": "MessagesPub",
+      "metric": "aws:num-messages-sent"
+    },
+    "violationEventType": "in-alarm",
+    "metricValue": {
+      "count": 54
+    },
+    "violationId": "37e18651d207bbc74236c13faf146127",
+    "securityProfileName": "MySecProfile"
+  }

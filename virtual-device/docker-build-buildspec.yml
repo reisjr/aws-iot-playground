@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo logging into docker
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Entered the post_build phase...
+      - cd docker/
+      - docker build -t ${tag}:latest .
+      - echo Build completed on `date`
+      - docker tag $tag:latest $ecr:$tag
+      - docker push $ecr
+      - echo Push completed on `date`
+

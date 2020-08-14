@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/dark.css')}}">
+    <title>AWS IoT Playground</title>
+  </head>
+  <body>
+    <table>
+        <tbody>
+            <tr>
+                <h1>Device Log</h1>
+            </tr>
+            <tr>
+            <div>
+                {% for item in log_list %}
+                <tr>
+                    <td><code>{{ item }}</code></td>
+                </tr>
+                {% endfor %}
+            </div>
+        </tr>
+        <tr>
+            <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
+        </tr>                
+    </tbody></table>
+  </body>
+</html>
