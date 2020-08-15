@@ -40,13 +40,13 @@ def create_app(cfg_file):
 
     @app.route("/")
     def home():
-        return render_template("index.html", message="This is IoT Device Playground", img_file="bulb_off.png", type="bulb_off")
+        return render_template("index.html", message="This is IoT Device Playground", img_file="bulb-off.png", type="bulb_off")
 
     @app.route("/press_on")
     def press_on():
         global vd
         vd.press_on()
-        return render_template("index.html", message="This is IoT Device Playground", img_file="bulb_off.png", type="bulb_off")
+        return render_template("index.html", message="This is IoT Device Playground", img_file="bulb-off.png", type="bulb_off")
 
     @app.route("/press_off")
     def press_off():

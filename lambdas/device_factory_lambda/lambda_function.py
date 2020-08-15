@@ -29,11 +29,13 @@ DDB_TABLE_DEVICE_CATALOG = os.getenv("DDB_TABLE_DEVICE_CATALOG", "DeviceFactoryC
 PREFIX = "dev"
 
 # Loading boto3 clients
+# BUG WA - https://github.com/boto/boto3/issues/1982
+config = Config(s3={'addressing_style': 'path'})
 
 iot_cli = boto3.client("iot")
 iot_data_cli = boto3.client("iot-data")
 ecs_cli = boto3.client("ecs")
-s3_cli = boto3.client("s3")
+s3_cli = boto3.client("s3", config=config)
 ddb_res = boto3.resource("dynamodb")
 
 # Load logger
@@ -475,6 +477,8 @@ def lambda_handler(event, context):
                 prov_type = body["prov-type"]
             
             response = create_device(device_type)
+        elif op == "list-devices":
+            response = generate_error_response("not implemented")
         elif op == "describe-device":
             device_id = ""
             
