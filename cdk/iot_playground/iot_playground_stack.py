@@ -8,10 +8,6 @@ from random import choice
 from string import ascii_uppercase
 
 
-def create_random_name(size=8):
-    return ''.join(choice(ascii_uppercase) for i in range(size))
-
-
 class IotPlaygroundStack(core.Stack):
 
     def __init__(self, scope: core.App, id: str, props, **kwargs) -> None:
@@ -43,8 +39,6 @@ class IotPlaygroundStack(core.Stack):
             peer=aws_ec2.Peer.any_ipv4(),
             connection=aws_ec2.Port.tcp(80)
         )
-
-        rnd_suffix = create_random_name(4).lower()
 
         # pipeline requires versioned bucket
         bucket = aws_s3.Bucket(

@@ -1,17 +1,20 @@
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-update-cdk:
-	cd iot-playground;
-	pip install --upgrade aws-cdk.core;
-	cd -;
+create-cdk-env:
+	python3 -m venv cdk/.env;
+	cd cdk && source .env/bin/activate && pip install -r requirements.txt;
 
-restart-env:
-	cd iot-playground;
-	python3 -m venv .env;
-	source .env/bin/activate.fish;
-	pip install -r requirements.txt;
-	cd -;
+update-cdk:
+	cd cdk && source .env/bin/activate && pip install --upgrade aws-cdk.core;
+
+deploy-stack:
+	cd cdk && source .env/bin/activate && cdk deploy iot-playground codepipeline --require-approval never;
+
+deploy-cdk-bootstrap:
+	# aws sts get-caller-identity --query "Account" --output text >> .iot-playground.cfg
+	# cd cdk && source .env/bin/activate && cdk bootstrap "aws://$ACC_ID/us-east-1";
+	./scripts/deploy-bootstrap.sh
 
 lint:
 	@echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"

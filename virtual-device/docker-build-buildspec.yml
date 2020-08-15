@@ -8,7 +8,7 @@ phases:
   build:
     commands:
       - echo Entered the post_build phase...
-      - cd docker/
+      - cd virtual-device/
       - docker build -t ${tag}:latest .
       - echo Build completed on `date`
       - docker tag $tag:latest $ecr:$tag

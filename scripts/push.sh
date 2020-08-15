@@ -18,7 +18,7 @@ echo "PIPELINE_NAME: $PIPELINE_NAME"
 echo "       REGION: $AWS_DEFAULT_REGION"
 
 echo "Zipping the code..."
-zip -r /tmp/source.zip ./docker
+zip -r /tmp/source.zip ./virtual-device
 
 echo "Sending the code to s3://${SOURCE_BUCKET}..."
 aws s3 cp /tmp/source.zip s3://${SOURCE_BUCKET}/source.zip

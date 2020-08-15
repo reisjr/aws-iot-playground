@@ -12,9 +12,6 @@ from aws_cdk.core import App, Duration
 import json
 
 
-TARGET_POLICY_NAME_PREFIX="WS_AUDIT_"
-
-
 class ControlPlaneStack(core.Stack):
     def __init__(self, app: core.App, id: str, props, **kwargs) -> None:
         super().__init__(app, id, **kwargs)
@@ -30,5 +27,3 @@ class ControlPlaneStack(core.Stack):
         api = apig.LambdaRestApi(
             self, "IoTPgControlPlaneApi",
             handler=handler)
-
-        #self.map_waltersco_subdomain('go', api)
