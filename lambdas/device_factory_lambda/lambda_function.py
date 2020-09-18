@@ -64,7 +64,7 @@ def create_random_name(size=8):
     return ''.join(choice(ascii_uppercase) for i in range(size))
 
 
-def include_device_in_catalog(dev_name, iot_endpoint, certificate_pem, container_data):
+def include_device_in_catalog(dev_name, iot_endpoint, certificate_pem, container_data, certificate_id, certificate_arn, policy_name):
     table = ddb_res.Table(DDB_TABLE_DEVICE_CATALOG)
     
     table.put_item(Item={
@@ -74,7 +74,10 @@ def include_device_in_catalog(dev_name, iot_endpoint, certificate_pem, container
         "ts": datetime.datetime.now().isoformat(),
         "Status": "PROV",
         "TaskArn": container_data["taskArn"],
-        "ClusterArn": container_data["clusterArn"]
+        "ClusterArn": container_data["clusterArn"],
+        "CertificateId": certificate_id,
+        "CertificateArn": certificate_arn,
+        "PolicyName": policy_name
     })
 
     return
@@ -107,6 +110,17 @@ def get_device_in_catalog(dev_name):
     )
 
     return r["Item"]
+
+
+def get_devices():
+    table = ddb_res.Table(DDB_TABLE_DEVICE_CATALOG)
+    
+    r = table.scan(
+        Select="ALL_ATTRIBUTES",
+        ConsistentRead=False
+    ) 
+
+    return r["Items"]
 
 
 def create_container(dev_name, cfg_file_url):
@@ -306,7 +320,7 @@ def create_device(thing_group_name="AC"):
         upload_file_to_s3(cfg_file)
         cfg_file_url = create_presigned_s3_url(cfg_file)
         container_data = create_container(dev_name, cfg_file_url)
-        include_device_in_catalog(dev_name, iot_endpoint, certificate_pem, container_data)
+        include_device_in_catalog(dev_name, iot_endpoint, certificate_pem, container_data, certificate_id, certificate_arn, policy_name)
 
         response['endpoint'] = iot_endpoint
         response['task_arn'] = container_data["taskArn"] 
@@ -340,29 +354,67 @@ def shutdown_task(cluster, task_id):
 def delete_device(device_id):
     # get data from DDB
     r = get_device_in_catalog(device_id)
+
     logger.debug(r)
 
-    # shutdown container
-    task_id = r["TaskArn"]
-    cluster = r["ClusterArn"]
-    shutdown_task(cluster, task_id)
+    if r:
+        # shutdown container
+        task_id = r["TaskArn"]
+        cluster = r["ClusterArn"]
+        shutdown_task(cluster, task_id)
 
-    # remove thing from aws iot
-    r = iot_cli.describe_thing()
+        device_name = r["id"]
+        certificate_arn = r["CertificateArn"]
+        certificate_id = r["CertificateId"]
+        policy_name = r["PolicyName"]
+        
+        iot_cli.detach_thing_principal(
+            thingName=device_name,
+            principal=certificate_arn)
 
-    # remove policy
-    r = iot_cli.delete_policy(
-        policyName=policy_name
-    )
+        iot_cli.detach_policy(
+            policyName=policy_name,
+            target=certificate_arn)
 
-    # update DDB
-    update_device_in_catalog(device_id, "TERMINATED")
+        logger.info("Deactivating certificate...")
+
+        iot_cli.update_certificate( 
+            certificateId=certificate_id,
+            newStatus="INACTIVE")
+    
+        logger.info("Removing certificate...")
+
+        iot_cli.delete_certificate(
+            certificateId=certificate_id
+        )
+        
+        # remove thing from aws iot
+        iot_cli.delete_thing(
+            thingName=device_name)
+
+        # remove policy
+        iot_cli.delete_policy(
+            policyName=policy_name
+        )
+
+        # update DDB
+        update_device_in_catalog(device_name, "TERMINATED")
+        
+        p = {
+            "dev-name": device_name,
+            "result": "TERMINATED"
+        }    
+    
+    return generate_response(p)
+
+
+def list_devices():
+    r = get_devices()
     
     p = {
-        "dev-name": device_id,
-        "result": "TERMINATED"
-    }    
-    
+        "devices": r
+    }
+
     return generate_response(p)
 
 
@@ -434,8 +486,8 @@ def link_devices(source_device_id, target_device_id):
 
 def generate_response(params):
     return {
-        'statusCode': 200,
-        'body': json.dumps(params)
+        "statusCode": 200,
+        "body": json.dumps(params)
     }
 
 
@@ -478,7 +530,7 @@ def lambda_handler(event, context):
             
             response = create_device(device_type)
         elif op == "list-devices":
-            response = generate_error_response("not implemented")
+            response = list_devices()
         elif op == "describe-device":
             device_id = ""
             
@@ -510,7 +562,7 @@ def lambda_handler(event, context):
             response = generate_error_response(op)
     except Exception as e:
         traceback.print_exc()
-        logger.error("General error", e)
+        logger.error("Unknown error", e)
         response = generate_error_response(e)
     
     logger.info("RESPONSE: {}".format(response))

@@ -33,7 +33,7 @@ do
     echo "Querying ECR..."
     aws ecr describe-images \
         --repository-name "iot-playground" \
-        --query "imageDetails[].imagePushedAt"
+        --query "imageDetails[].imagePushedAt" | sort
     sleep 10
 done
 

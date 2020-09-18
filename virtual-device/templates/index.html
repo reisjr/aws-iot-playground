@@ -2,15 +2,13 @@
 
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/dark.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dark.css') }}">
     <title>AWS IoT Playground</title>
   </head>
   <body>
+    <h1>AWS IoT Playground</h1>
     <table>
         <tbody>
-        <tr>
-            <h1>AWS IoT Playground</h1>
-        </tr>
         <tr>
             <td>{{ message }}</td>
         </tr>
@@ -18,23 +16,25 @@
             <td>Type: {{ type }}</td>
         </tr>
         <tr>
-            <td><img src="{{url_for('static', filename=img_file)}}"></td>
+            <td><img src="{{ url_for('static', filename=img_file) }}"></td>
         </tr>
         </tbody>
     </table>
 
     <table>
         <tbody>
-        <tr><td><a href="/config">Config</a></td></tr>
-        <tr><td><a href="/shadow">Shadow</a></td></tr>
-        <tr><td><a href="/endpoint">Endpoint</a></td></tr>
-        <tr><td><a href="/cert">Cert</a></td></tr>
-        <tr><td><a href="/log">Log</a></td></tr>
+        <tr><td><a href="/config">Configure device</a></td></tr>
+        <tr><td><a href="/shadow">See device shadow</a></td></tr>
+        <tr><td><a href="/endpoint">See iot endpoint</a></td></tr>
+        <tr><td><a href="/cert">See device cert</a></td></tr>
+        <tr><td><a href="/log">See device log</a></td></tr>
+        <tr><td><a href="/help">Help</a></td></tr>
         <tr><td>
-            <form action="/tamper">
-                <input type="submit" value="Tamper" />
+            <form action="{{ url_for('tamper') }}" method="POST">
+                <input type="submit" value="Tamper">
             </form>
         </tr>
+        <tr><td>&nbsp;</td></tr>
         <tr>
             <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
         </tr>            

@@ -161,15 +161,24 @@ def create_app(cfg_file):
         log_list = vd.get_log_list()
 
         return render_template("log.html", log_list=log_list)
+    
 
-    @app.route("/tamper")
+    @app.route("/help")
+    def help():
+        return render_template("help.html")
+
+
+    @app.route('/tamper', methods=['POST'])
     def tamper():
         global vd
 
-        log_list = vd.tamper()
+        vd.tamper()
 
-        return redirect(url_for("/"))
-        
+        return redirect(request.url)
+
+    
+    ######## HELPER FUNCTIONS #################
+
 
     def get_client_id(cfg_file):
         return cfg_file["device_name"]
@@ -178,8 +187,10 @@ def create_app(cfg_file):
     def get_endpoint(cfg_file):
         return cfg_file["iot_endpoint"]
 
+
     def get_device_type(cfg_file):
         return cfg_file.get("device-type", "generic")
+
 
     def run_virtual_device(cfg_file_json):
         global vd

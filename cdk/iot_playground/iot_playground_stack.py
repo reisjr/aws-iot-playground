@@ -203,13 +203,7 @@ class IotPlaygroundStack(core.Stack):
             code=aws_lambda.Code.asset("../lambdas/device_command_lambda"),
             timeout=Duration.minutes(1))
 
-        function_dev_cmd.add_environment("BUCKET_NAME", bucket.bucket_name)
-        function_dev_cmd.add_environment("ECS_CLUSTER", ecs_cluster.cluster_name)
-        function_dev_cmd.add_environment("ECS_TASK_DEF", fargate_task_def.task_definition_arn)
         function_dev_cmd.add_environment("DDB_TABLE_DEVICE_CATALOG", table.table_name)
-        function_dev_cmd.add_environment("SUBNET_1", selection.subnets[0].subnet_id)
-        function_dev_cmd.add_environment("SUBNET_2", selection.subnets[1].subnet_id)
-        function_dev_cmd.add_environment("SEC_GROUP", sg.security_group_id)
 
         table.grant_read_write_data(function_dev_cmd)
 
