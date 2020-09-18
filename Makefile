@@ -16,6 +16,9 @@ deploy-cdk-bootstrap:
 	# cd cdk && source .env/bin/activate && cdk bootstrap "aws://$ACC_ID/us-east-1";
 	./scripts/deploy-bootstrap.sh
 
+destroy-stack:
+	cd cdk && source .env/bin/activate && cdk destroy iot-playground codepipeline --require-approval never;
+
 lint:
 	@echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"
 	@pylint --rcfile=setup.cfg **/*.py

@@ -1,6 +1,7 @@
 from aws_cdk import (
     core, aws_dynamodb, aws_lambda, aws_ec2, aws_ecs,
-    aws_apigateway, aws_iam, aws_s3, aws_ecr, aws_ssm, aws_codebuild
+    aws_apigateway, aws_iam, aws_s3, aws_ecr, aws_ssm, 
+    aws_codebuild, aws_iot
 )
 from aws_cdk.aws_ec2 import SubnetType, Vpc
 from aws_cdk.core import App, Construct, Duration
@@ -188,13 +189,59 @@ class IotPlaygroundStack(core.Stack):
             effect=aws_iam.Effect.ALLOW,
             actions=["ecs:RunTask", "ecs:StopTask"],
             resources=["*"]
-        ))              
+        ))
 
         api_gtw = aws_apigateway.LambdaRestApi(self, 
             id="DeviceFactoryApi", 
             rest_api_name="DeviceFactoryApi",
             handler=function)
 
+
+        function_dev_cmd = aws_lambda.Function(self, "DeviceCommandLambda",
+            runtime=aws_lambda.Runtime.PYTHON_3_7,
+            handler="lambda_function.lambda_handler",
+            code=aws_lambda.Code.asset("../lambdas/device_command_lambda"),
+            timeout=Duration.minutes(1))
+
+        function_dev_cmd.add_environment("BUCKET_NAME", bucket.bucket_name)
+        function_dev_cmd.add_environment("ECS_CLUSTER", ecs_cluster.cluster_name)
+        function_dev_cmd.add_environment("ECS_TASK_DEF", fargate_task_def.task_definition_arn)
+        function_dev_cmd.add_environment("DDB_TABLE_DEVICE_CATALOG", table.table_name)
+        function_dev_cmd.add_environment("SUBNET_1", selection.subnets[0].subnet_id)
+        function_dev_cmd.add_environment("SUBNET_2", selection.subnets[1].subnet_id)
+        function_dev_cmd.add_environment("SEC_GROUP", sg.security_group_id)
+
+        table.grant_read_write_data(function_dev_cmd)
+
+        function_dev_cmd.add_to_role_policy(aws_iam.PolicyStatement(
+            effect=aws_iam.Effect.ALLOW,
+            actions=["iot:*"],
+            resources=["*"]
+        ))
+
+        function_dev_cmd.add_to_role_policy(aws_iam.PolicyStatement(
+            effect=aws_iam.Effect.ALLOW,
+            actions=["iam:PassRole"],
+            resources=["arn:aws:iam::*:role/*"]
+        ))
+
+        topic_rule_payload = aws_iot.CfnTopicRule.TopicRulePayloadProperty(
+            description="Invoke Lambda",
+            rule_disabled=False,
+            aws_iot_sql_version="2016-03-23",
+            sql="select *, topic() AS topic FROM 'cmd/+/event'",
+            actions=[
+                aws_iot.CfnTopicRule.ActionProperty(lambda_=
+                    aws_iot.CfnTopicRule.LambdaActionProperty(
+                        function_arn=function_dev_cmd.function_arn)),
+            ]   
+        )
+
+        aws_iot.CfnTopicRule(self, "RuleDeviceCmdToLambda",
+            topic_rule_payload=topic_rule_payload,
+            rule_name="iot_playground_device_cmd_to_lambda" # dash not supported
+        )
+    
         # ssm parameter to get api endpoint later
         bucket_param = aws_ssm.StringParameter(
             self, "ParameterDeviceFactoryEndpoint",

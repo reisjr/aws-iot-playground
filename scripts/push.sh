@@ -25,3 +25,15 @@ aws s3 cp /tmp/source.zip s3://${SOURCE_BUCKET}/source.zip
 
 echo "Starting the pipeline ${PIPELINE_NAME}..."
 aws codepipeline start-pipeline-execution --name ${PIPELINE_NAME}
+
+echo "Checking  the pipeline ${PIPELINE_NAME}..."
+
+for i in {1..50}
+do
+    echo "Querying ECR..."
+    aws ecr describe-images \
+        --repository-name "iot-playground" \
+        --query "imageDetails[].imagePushedAt"
+    sleep 10
+done
+

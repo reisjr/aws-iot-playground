@@ -63,6 +63,15 @@ There are different scripts to help doing common operations.
 
 * cp-create-thing.sh - create a new device
 
+## Virtual Device Commands
+
+Using the "/config" path send the command. For example, /config?time=1
+
+* time=<int> - change the **delay** between messages
+* reconnect <no-args> - force a reconnection 
+* clean <no-args> - force a clean disconnect
+* topic=<topic> - change the publish topic. Ex: /config?topic=newtopic/dev1
+
 # Structure
 
 * control-plane

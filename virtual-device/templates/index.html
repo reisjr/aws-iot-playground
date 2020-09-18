@@ -20,11 +20,21 @@
         <tr>
             <td><img src="{{url_for('static', filename=img_file)}}"></td>
         </tr>
+        </tbody>
+    </table>
+
+    <table>
+        <tbody>
         <tr><td><a href="/config">Config</a></td></tr>
         <tr><td><a href="/shadow">Shadow</a></td></tr>
         <tr><td><a href="/endpoint">Endpoint</a></td></tr>
         <tr><td><a href="/cert">Cert</a></td></tr>
         <tr><td><a href="/log">Log</a></td></tr>
+        <tr><td>
+            <form action="/tamper">
+                <input type="submit" value="Tamper" />
+            </form>
+        </tr>
         <tr>
             <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
         </tr>            

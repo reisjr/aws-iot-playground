@@ -1,5 +1,5 @@
 # home.py
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, redirect
 import os
 import sys
 import json
@@ -162,6 +162,14 @@ def create_app(cfg_file):
 
         return render_template("log.html", log_list=log_list)
 
+    @app.route("/tamper")
+    def tamper():
+        global vd
+
+        log_list = vd.tamper()
+
+        return redirect(url_for("/"))
+        
 
     def get_client_id(cfg_file):
         return cfg_file["device_name"]
@@ -196,7 +204,7 @@ def create_app(cfg_file):
             "device": client_id
         }
 
-        vd.register_last_will_and_testament("lwt", json.dumps(lwt))
+        vd.register_last_will_and_testament("cmd/{}/lwt".format(client_id), json.dumps(lwt))
 
         vd.prepare_files(cfg_file_json)
         vd.setup()

@@ -41,7 +41,7 @@
           "arn:aws:iot:*:*:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/get",
           "arn:aws:iot:*:*:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/update",
           "arn:aws:iot:*:*:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update",
-          "arn:aws:iot:*:*:topic/lwt"
+          "arn:aws:iot:*:*:topic/cmd/${iot:Connection.Thing.ThingName}/*"
         ]
       },
       {

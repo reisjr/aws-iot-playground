@@ -493,6 +493,47 @@ class VirtualDevice:
         return
 
 
+    def publish_external_ip(self):
+        self.log(">publish_external_ip")
+        external_ip = ""
+
+        try:
+            external_ip = urllib.urlopen('https://ident.me').read().decode('utf8')
+            
+            msg = {
+                "device": self.name,
+                "ip": str(external_ip)
+            }
+
+            payload = json.dumps(msg)
+
+            self.log(" publish_external_ip - Publishing...")
+            self._mqtt_client.publish("cmd/{}/event".format(self.name), payload, 0)
+        except Exception as e:
+            self.log(" publish_external_ip - Error getting IP '{}'".format(str(e)))
+        
+        self.log("<publish_external_ip - '{}'".format(external_ip))
+
+
+    def tamper(self):
+        self.log(">tamper")
+        
+        try:            
+            msg = {
+                "device": self.name,
+                "tamper_type": "enclosure_violated"
+            }
+
+            payload = json.dumps(msg)
+
+            self.log(" tamper - Tamper...")
+            self._mqtt_client.publish("cmd/{}/tamper".format(self.name), payload, 0)
+        except Exception as e:
+            self.log(" tamper - Error" + str(e))
+        
+        self.log("<tamper")
+
+
     def setup(self):
         self.log(">setup")
 
@@ -534,8 +575,12 @@ class VirtualDevice:
 
         return
 
+
     def start(self):
         self.log(">start")
+
+        # reporting current ip
+        self.publish_external_ip()
 
         # check any pending job
         self.log(" start - Checking for pending jobs...")
