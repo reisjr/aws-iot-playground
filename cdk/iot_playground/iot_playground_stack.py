@@ -205,6 +205,13 @@ class IotPlaygroundStack(core.Stack):
 
         function_dev_cmd.add_environment("DDB_TABLE_DEVICE_CATALOG", table.table_name)
 
+        function_dev_cmd.add_permission("iot-lambda-perm",
+            principal=aws_iam.ServicePrincipal('iot.amazonaws.com'),
+            action="lambda:InvokeFunction",
+            source_account=core.Aws.ACCOUNT_ID ,
+            source_arn="arn:aws:iot:us-east-1:086464235113:rule/iot_playground_device_cmd_to_lambda",
+        )
+
         table.grant_read_write_data(function_dev_cmd)
 
         function_dev_cmd.add_to_role_policy(aws_iam.PolicyStatement(

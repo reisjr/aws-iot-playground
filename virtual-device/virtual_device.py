@@ -525,9 +525,10 @@ class VirtualDevice:
             }
 
             payload = json.dumps(msg)
+            topic = "cmd/{}/tamper".format(self.name)
 
-            self.log(" tamper - Tamper...")
-            self._mqtt_client.publish("cmd/{}/tamper".format(self.name), payload, 0)
+            self.log(" tamper - Sending tamper notification to '{}'...".format(topic))
+            self._mqtt_client.publish(topic, payload, 0)
         except Exception as e:
             self.log(" tamper - Error" + str(e))
         
@@ -599,8 +600,10 @@ class VirtualDevice:
             if self._next_message_time <= current_time:
                 #payload = { "temp" : 30 }
                 self.log(" start - Sampling delay {}".format(self._sampling_delay))
-                self.log(" start - Sending to '{}' the payload below\n{}".format(self.mqtt_telemetry_topic, self.payload))
-                self._mqtt_client.publish(self.mqtt_telemetry_topic.format(self.name), json.dumps(self.payload), 0)
+                topic = self.mqtt_telemetry_topic.format(self.name)
+
+                self.log(" start - Sending to '{}' the payload below\n{}".format(topic, self.payload))
+                self._mqtt_client.publish(topic, json.dumps(self.payload), 0)
                 self._next_message_time = current_time + datetime.timedelta(0, self._sampling_delay)
 
             if self._stop: # Using next_message to stop the thread properly

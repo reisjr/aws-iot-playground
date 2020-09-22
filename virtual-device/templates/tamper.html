@@ -3,7 +3,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dark.css') }}">
-    <title>AWS IoT Playground</title>
+    <title>AWS IoT Playground - Tamper</title>
   </head>
   <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -14,19 +14,11 @@
             {% endfor %}</ul>
         {% endif %}
     {% endwith %}
-    <h1>AWS IoT Playground</h1>
+    <h1>AWS IoT Playground - Tamper</h1>
     <table>
         <tbody>
         <tr>
-            <td>{{ message }}</td>
-        </tr>
-        {% if name %} 
-        <tr>
-            <td>Name: {{ name }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-            <td>Type: {{ type }}</td>
+            <!--td>{{ message }}</td-->
         </tr>
         <tr>
             <td><img src="{{ url_for('static', filename=img_file) }}"></td>
@@ -34,19 +26,10 @@
         </tbody>
     </table>
 
+    <p>Oooops... this device has been violated!</p>
+
     <table>
         <tbody>
-        <tr><td><a href="/config">Configure device</a></td></tr>
-        <tr><td><a href="/shadow">See device shadow</a></td></tr>
-        <tr><td><a href="/endpoint">See iot endpoint</a></td></tr>
-        <tr><td><a href="/cert">See device cert</a></td></tr>
-        <tr><td><a href="/log">See device log</a></td></tr>
-        <tr><td><a href="/help">Help</a></td></tr>
-        <tr><td>
-            <form action="{{ url_for('tamper') }}" method="POST">
-                <input type="submit" value="Tamper">
-            </form>
-        </tr>
         <tr><td>&nbsp;</td></tr>
         <tr>
             <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>

@@ -1,5 +1,5 @@
 # home.py
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, flash
 import os
 import sys
 import json
@@ -40,7 +40,9 @@ def create_app(cfg_file):
 
     @app.route("/")
     def home():
-        return render_template("index.html", message="This is IoT Device Playground", img_file="bulb-off.png", type="bulb_off")
+        global vd
+        name = vd.name
+        return render_template("index.html", message="This is IoT Device Playground", name=name, img_file="bulb-off.png", type="bulb_off")
 
     @app.route("/press_on")
     def press_on():
@@ -130,7 +132,6 @@ def create_app(cfg_file):
             print("Reconnect '{}'...".format(reconnect))
             vd.force_reconnect()
 
-
         if "clean" in request.args:
             clean = request.args.get('clean')
             print("Disconnect clean '{}'...".format(clean))
@@ -151,8 +152,18 @@ def create_app(cfg_file):
             except Exception as e:
                 print(e)
                 data = e
+        
+        if "payload" in request.args:
+            payload = request.args.get("payload")
+            try:
+                p = json.loads(payload)
+                vd.payload = p
+            except Exception as e:
+                print(e)
+                data = e
 
         return render_template("config.html", message=data)
+
 
     @app.route("/log")
     def log():
@@ -168,13 +179,17 @@ def create_app(cfg_file):
         return render_template("help.html")
 
 
-    @app.route('/tamper', methods=['POST'])
+    @app.route("/tamper", methods=['GET', 'POST'])
     def tamper():
         global vd
 
-        vd.tamper()
-
-        return redirect(request.url)
+        if request.method == 'POST':
+            vd.tamper()
+        else:    
+            flash("All the form fields are required.")
+    
+        return render_template("tamper.html", img_file="switch.png")
+       
 
     
     ######## HELPER FUNCTIONS #################

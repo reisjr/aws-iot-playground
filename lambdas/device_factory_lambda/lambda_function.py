@@ -422,7 +422,8 @@ def describe_device(device_id):
     r = get_device_in_catalog(device_id)
     
     p = {
-        "dev-name": device_id
+        "dev-name": device_id,
+        "data": r
     }
 
     return generate_response(p)
