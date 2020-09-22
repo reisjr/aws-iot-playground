@@ -113,6 +113,8 @@ venv.bak/
 *.tsbuildinfo
 
 # Local state files & OS specifics
+.iot-playground.cfg
+.config-*
 .DS_Store
 node_modules/
 lerna-debug.log
