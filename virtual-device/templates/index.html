@@ -10,19 +10,16 @@
         {% if messages %}
         <ul>
             {% for message in messages %}
-            <li>{ { message[1] }}</li>
+            <li>{{ message[1] }}</li>
             {% endfor %}</ul>
         {% endif %}
     {% endwith %}
     <h1>AWS IoT Playground</h1>
     <table>
         <tbody>
-        <tr>
-            <td>{{ message }}</td>
-        </tr>
         {% if name %} 
         <tr>
-            <td>Name: {{ name }}</td>
+            <td><b>Name: {{ name }}</b></td>
         </tr>
         {% endif %}
         <tr>
@@ -42,9 +39,13 @@
         <tr><td><a href="/cert">See device cert</a></td></tr>
         <tr><td><a href="/log">See device log</a></td></tr>
         <tr><td><a href="/help">Help</a></td></tr>
-        <tr><td>
-            <form action="{{ url_for('tamper') }}" method="POST">
-                <input type="submit" value="Tamper">
+        <tr><td><br>
+            <form action="{{ url_for('actions') }}" method="POST">
+                <button type="submit" name="action" value="tamper">Tamper</button><br><br>
+                <button type="submit" name="action" value="reconnect">Force reconnect</button><br><br>
+                <button type="submit" name="action" value="clean">Clean disconnect</button><br><br>
+                <button type="submit" name="action" value="large">Send large payload</button><br><br>
+                <button type="submit" name="action" value="autherr">Force auth error</button><br><br>
             </form>
         </tr>
         <tr><td>&nbsp;</td></tr>

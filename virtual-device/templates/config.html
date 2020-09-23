@@ -6,21 +6,23 @@
     <title>AWS IoT Playground - Config</title>
   </head>
   <body>
+    <form action="{{ url_for('config') }}" method="POST">
     <table>
         <tbody>
+            <tr><h1>IoT Endpoint</h1></tr>
+            <tr><td><label for="ftopic">Topic:</label><br></td><td></td></tr>
+            <tr><td><input type="text" id="ftopic" name="ftopic" value=""></td><td>Example: dt/something</td></tr>
+            <tr><td><label for="fsampling">Sampling rate:</label><br></td><td></td></tr>
+            <tr><td><input type="text" id="fsampling" name="fsampling" value=""></td><td>Example: 60</td></tr>
+            <tr><td><label for="fpayload">Payload:</label></td><td></td></tr>
+            <tr><td><input type="text" id="fpayload" name="fpayload" value=""></td><td>Example: {'key': 'value'}</td></tr>
+            <tr><td><br></td></tr>
+            <tr><td><input type="submit" value="Update Config"></td></tr>
             <tr>
-                <h1>IoT Endpoint</h1>
-            </tr>
-            <tr>
-            <div>
-                <pre>
-                    <code>{{ message }}</code>
-                </pre>
-            </div>
-        </tr>
-        <tr>
-            <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
-        </tr>                
-    </tbody></table>
+              <td><a href="https://aws.amazon.com/what-is-cloud-computing"><img src="https://d0.awsstatic.com/logos/powered-by-aws-white.png" alt="Powered by AWS Cloud Computing"></a></td>
+            </tr>                
+          </tbody>
+      </table>
+    </form>                   
   </body>
 </html>

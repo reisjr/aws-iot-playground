@@ -30,10 +30,10 @@ echo "Checking  the pipeline ${PIPELINE_NAME}..."
 
 for i in {1..50}
 do
-    echo "Querying ECR..."
+    echo "$i - Querying ECR..."
     aws ecr describe-images \
         --repository-name "iot-playground" \
-        --query "imageDetails[].imagePushedAt" | sort
+        --query "imageDetails[].imagePushedAt" | sort | grep ":" | tail -3 # Filter dates and the most recent ones
     sleep 10
 done
 

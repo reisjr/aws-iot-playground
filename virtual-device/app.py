@@ -1,15 +1,15 @@
 # home.py
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash, current_app
 import os
 import sys
 import json
 import threading
 import atexit
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 import json
-import boto3
 import time
-from virtual_device import VirtualDevice, VirtualSwitch, VirtualBulb
+import random
+import string
+from virtual_device import VirtualDevice, VirtualSwitch, VirtualBulb, RogueDevice
 
 # Not a good practice =\
 global vd
@@ -18,12 +18,14 @@ PORT = int(os.getenv("PORT", "80"))
 
 mqtt_thread = threading.Thread()
 
-
 def create_app(cfg_file):
     app = Flask(__name__)
+    app.secret_key = 'aws-iot-playground'
+    app.config['SESSION_TYPE'] = 'filesystem'
+
 
     def interrupt():
-        print(">interrupt")
+        current_app.logger.info(">interrupt")
 
         global mqtt_thread
         global vd
@@ -111,12 +113,12 @@ def create_app(cfg_file):
         return render_template("endpoint.html", message=data)
 
 
-    @app.route("/config")
+    @app.route("/config", methods=['GET', 'POST'])
     def config():
         data = ""
         global vd
 
-        if "time" in request.args:
+        if "time" in request.args and request.args.get("time"):
             time = request.args.get('time')
             print("Changing time to '{}'...".format(time))
 
@@ -127,33 +129,18 @@ def create_app(cfg_file):
                 print(e)
                 data = e
 
-        if "reconnect" in request.args:
-            reconnect = request.args.get('reconnect')
-            print("Reconnect '{}'...".format(reconnect))
-            vd.force_reconnect()
-
-        if "clean" in request.args:
-            clean = request.args.get('clean')
-            print("Disconnect clean '{}'...".format(clean))
-
-            try:
-                vd.set_clean_disconnect(clean)
-            except Exception as e:
-                print(e)
-                data = e
-
-        if "topic" in request.args:
+        if "topic" in request.args and request.args.get("topic"):
             topic = request.args.get('topic')
             print("Changing topic to '{}'...".format(topic))
 
             try:
-                vd.mqtt_telemetry_topic = topic
                 data = topic
+                vd.mqtt_telemetry_topic = topic
             except Exception as e:
                 print(e)
                 data = e
         
-        if "payload" in request.args:
+        if "payload" in request.args and request.args.get("payload"):
             payload = request.args.get("payload")
             try:
                 p = json.loads(payload)
@@ -179,17 +166,61 @@ def create_app(cfg_file):
         return render_template("help.html")
 
 
-    @app.route("/tamper", methods=['GET', 'POST'])
-    def tamper():
+    @app.route("/actions", methods=['GET', 'POST'])
+    def actions():
         global vd
 
         if request.method == 'POST':
-            vd.tamper()
+            current_app.logger.info(" actions - POST")
+            action = request.form['action']
+            current_app.logger.info(" actions - POST - {}".format(action))
+
+            if action == "tamper":
+                vd.tamper()
+                return render_template("tamper.html", img_file="switch.png")
+            elif action == "reconnect":                
+                current_app.logger.info("Forcing reconnection...")
+                vd.force_reconnect()
+                flash("Forcing reconnection")
+            elif action == "clean":
+                current_app.logger.info("Clean disconnect...")
+                flash("Clean disconnect")
+                try:
+                    vd.set_clean_disconnect(True)
+                except Exception as e:
+                    current_app.logger.info(e)
+            elif action == "large":
+                current_app.logger.info("Large payload...")
+                flash("Large payload")
+
+                letters = string.ascii_lowercase
+                msg = ''.join(random.choice(letters) for i in range(500))
+                payload = { "payload": msg }
+                
+                try:
+                    vd.publish(payload)
+                    current_app.logger.info("Large payload published")
+                except Exception as e:
+                    current_app.logger.info(e)
+                    flash("Error sending payload")
+            elif action == "autherr":
+                current_app.logger.info("Auth error...")
+                flash("Auth error")
+
+                try:
+                    vd.force_auth_error()
+                    current_app.logger.info("Auth error")
+                except Exception as e:
+                    current_app.logger.info(e)
+                    flash("Error sending payload")
+
+            else:
+                flash("Invalid action.")
         else:    
             flash("All the form fields are required.")
-    
-        return render_template("tamper.html", img_file="switch.png")
-       
+        
+        return redirect(url_for("home"))
+        # return render_template("index.html", message="This is IoT Device Playground", img_file="bulb-off.png", type="bulb_off")
 
     
     ######## HELPER FUNCTIONS #################
@@ -222,6 +253,8 @@ def create_app(cfg_file):
             vd = VirtualBulb(client_id, endpoint)
         elif dev_type == "switch":
             vd = VirtualSwitch(client_id, endpoint)
+        elif dev_type == "rogue":
+            vd = RogueDevice(client_id, endpoint)
         else:
             print("unknown device type...")
 
@@ -277,5 +310,6 @@ if __name__ == '__main__':
     cfg_file = json.loads(response.read())
 
     app = create_app(cfg_file)
-
-    app.run(threaded=True, host='0.0.0.0', port=PORT)
+    
+    app.debug = True
+    app.run(threaded=True, host='0.0.0.0', port=PORT, use_reloader=False)

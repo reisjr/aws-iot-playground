@@ -5,6 +5,8 @@ import time
 import datetime
 import os
 import sys
+import random
+import string
 from enum import Enum
 
 if sys.version[0:1] == '3':
@@ -40,6 +42,7 @@ class VirtualDevice:
     _clean_disconnect = True
     _log = None
     _force_reconnect = False
+    _pending_payloads = []
 
     # Class Attributes
     endpoint = "ep"
@@ -515,10 +518,39 @@ class VirtualDevice:
         self.log("<publish_external_ip - '{}'".format(external_ip))
 
 
+    def publish(self, msg):
+        self.log(">publish")
+        
+        try:
+            payload = json.dumps(msg)
+            topic = self.mqtt_telemetry_topic.format(self.name)
+
+            self.log(" publish - Sending payload '{}' notification to '{}'...".format(payload, topic))
+            self._mqtt_client.publish(topic, payload, 0)
+        except Exception as e:
+            self.log(" publish - Error" + str(e))
+        
+        self.log("<publish")
+
+
+    def force_auth_error(self):
+        self.log(">force_auth_error")
+        
+        try:
+            payload = json.dumps({"auth": "error"})
+            topic = "invalid-topic-for-error"
+
+            self.log(" force_auth_error - Sending payload '{}' notification to '{}'...".format(payload, topic))
+            self._mqtt_client.publish(topic, payload, 0)
+        except Exception as e:
+            self.log(" force_auth_error - Error" + str(e))
+        
+        self.log("<force_auth_error")
+
     def tamper(self):
         self.log(">tamper")
         
-        try:            
+        try:
             msg = {
                 "device": self.name,
                 "tamper_type": "enclosure_violated"
@@ -606,6 +638,13 @@ class VirtualDevice:
                 self._mqtt_client.publish(topic, json.dumps(self.payload), 0)
                 self._next_message_time = current_time + datetime.timedelta(0, self._sampling_delay)
 
+            if self._pending_payloads:
+                try:
+                    p = self._pending_payloads.pop()
+                    self._mqtt_client.publish(p.get("topic"), p.get("payload"), 0)
+                except Exception:
+                    self.log("Error")
+
             if self._stop: # Using next_message to stop the thread properly
                 self.log(" start - Stopping...")
                 if self._clean_disconnect:
@@ -671,6 +710,74 @@ class VirtualBulb(VirtualDevice):
         VirtualDevice.__init__(self, name, endpoint)
 
 
+class RogueDevice(VirtualDevice):
+
+    def __init__(self, name, endpoint):
+        VirtualDevice.__init__(self, name, endpoint)
+        self.log(self.__class__)
+
+    def start(self):
+        self.log(">start")
+
+        # reporting current ip
+        self.publish_external_ip()
+
+        # check any pending job
+        self.log(" start - Checking for pending jobs...")
+        self.get_jobs(self.name)
+
+        # get shadow status
+        self.log(" start - Getting shadow status...")
+        self.get_shadow(self.name)
+
+        #moving to self to allow fast configuration change
+        self._next_message_time = datetime.datetime.now()
+
+        while True:
+            current_time = datetime.datetime.now()
+
+            if self._next_message_time <= current_time:
+                #payload = { "temp" : 30 }
+                self.log(" start - Sampling delay {}".format(self._sampling_delay))
+                topic = self.mqtt_telemetry_topic.format(self.name)
+
+                self.log(" start - Sending to '{}' the payload below\n{}".format(topic, self.payload))
+                self._mqtt_client.publish(topic, json.dumps(self.payload), 0)
+                self._next_message_time = current_time + datetime.timedelta(0, self._sampling_delay)
+
+            if random.randint(0, 1000) == 100:
+                # do random rogue stuff
+                act = random.randint(0, 2)
+
+                if act == 0:
+                    self.force_auth_error()
+                elif act == 1:
+                    letters = string.ascii_lowercase
+                    msg = ''.join(random.choice(letters) for i in range(500))
+                    payload = { "payload": msg }
+                    self.publish(payload)
+                elif act == 2:
+                    self.tamper()
+
+            if self._stop: # Using next_message to stop the thread properly
+                self.log(" start - Stopping...")
+                if self._clean_disconnect:
+                    self.log(" start - Disconnecting from the broker...")
+                    self._mqtt_client.disconnect()
+                    self.log("<start - Disconnected")
+                else:
+                    self.log("<start - Sudden disconnect...")
+
+                break
+
+            if self._force_reconnect:
+                self.log(" start - Forcing reconnect...")
+                self._mqtt_client.configureCredentials("/tmp/rootCA.pem", "/tmp/key", "/tmp/cert")
+                self.connect(self._mqtt_client)
+                self._force_reconnect = False
+
+            time.sleep(0.5)
+
 class MaxSizeList(object):
     def __init__(self, size_limit):
         self.list = [None] * size_limit
@@ -690,7 +797,7 @@ class MaxSizeList(object):
             return self.list[split:] + self.list[:split]
 
 
-if __name__ == '__main__':
-    vd = VirtualDevice("dev-DDQA", "a1x30szgyfp50b-ats.iot.us-east-1.amazonaws.com")
-    vd.setup()
-    vd.start()
+# if __name__ == '__main__':
+#     vd = VirtualDevice("dev-DDQA", "a1x30szgyfp50b-ats.iot.us-east-1.amazonaws.com")
+#     vd.setup()
+#     vd.start()
