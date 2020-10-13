@@ -148,8 +148,7 @@ class IotPlaygroundStack(core.Stack):
         # The code that defines your stack goes here
         table = aws_dynamodb.Table(self, "DeviceFactoryCatalog",
             partition_key=aws_dynamodb.Attribute(name="id", type=aws_dynamodb.AttributeType.STRING),
-            read_capacity=3,
-            write_capacity=3)
+            billing_mode=aws_dynamodb.BillingMode.PAY_PER_REQUEST)
 
         function = aws_lambda.Function(self, "DeviceFactoryLambda",
             runtime=aws_lambda.Runtime.PYTHON_3_7,
