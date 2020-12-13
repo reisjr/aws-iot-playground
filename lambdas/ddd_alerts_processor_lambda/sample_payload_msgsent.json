@@ -1,0 +1,22 @@
+{
+    "Records": [
+        {
+            "EventSource": "aws:sns",
+            "EventVersion": "1.0",
+            "EventSubscriptionArn": "arn:aws:sns:us-east-1:xxxxxxxxxxxx:DDD_Violations:e17eb501-d98c-4f3c-bb84-c3acd06044e2",
+            "Sns": {
+                "Type": "Notification",
+                "MessageId": "4a368c7b-c98a-5f32-82ba-da33de9e4d57",
+                "TopicArn": "arn:aws:sns:us-east-1:xxxxxxxxxxxx:DDD_Violations",
+                "Subject": null,
+                "Message": "{\"violationEventTime\":1573786800000,\"thingName\":\"dev-IZWB\",\"behavior\":{\"criteria\":{\"consecutiveDatapointsToClear\":1,\"value\":{\"count\":10},\"durationSeconds\":300,\"consecutiveDatapointsToAlarm\":1,\"comparisonOperator\":\"less-than\"},\"name\":\"MessagesPub\",\"metric\":\"aws:num-messages-sent\"},\"violationEventType\":\"in-alarm\",\"metricValue\":{\"count\":54},\"violationId\":\"37e18651d207bbc74236c13faf146127\",\"securityProfileName\":\"MySecProfile\"}",
+                "Timestamp": "2019-11-15T03:00:36.527Z",
+                "SignatureVersion": "1",
+                "Signature": "C+wmlktdLSErFjclDOc4J3LPBLfDUuvIv85NCytpr8pX4Bq/dMnUp6PXCkFIgknG/StekbAJHU0tlKM+aiAXfCKars65i1n+MmZ8Ekkmub70DvO1mCMItnf1TuTxzdljz8g+7fXNaW0qDZypSg3X5ofLPkrxL3r/SMMpAD2FCDD9DVqYk7mAmH6Sz6ygWbNRfKy297jokIjlar//Vu0uL4SmZ3Q2ygQPuq0qEIY7g/DtNdYS1lLhsIVbP0U4lawTck/pg1FmhoVZCG09+UGs9Y1wPM6d9jqLIfiuPXAy2gGncnCaEF66rnIqcX+mkrQSp+tL58cOrCuyybyyxdFmlQ==",
+                "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem",
+                "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:xxxxxxxxxxxx:DDD_Violations:e17eb501-d98c-4f3c-bb84-c3acd06044e2",
+                "MessageAttributes": {}
+            }
+        }
+    ]
+}

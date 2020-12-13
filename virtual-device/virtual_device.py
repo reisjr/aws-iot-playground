@@ -69,6 +69,7 @@ class VirtualDevice:
         self.endpoint = endpoint
         self.mqtt_port = DEFAULT_MQTT_PORT
         self._log = MaxSizeList(LOG_SIZE)
+        self.first_sample = True
 
         self.log("New virtual device...")
         self.log("CLIENT_ID: '{}'".format(name))
@@ -658,13 +659,15 @@ class VirtualDevice:
                 self._mqtt_client.publish(topic, json.dumps(self.payload), 0)
                 self._next_message_time = current_time + datetime.timedelta(0, self._sampling_delay)
 
-            if self._next_device_defender_telemetry <= current_time:
+            if self._next_device_defender_telemetry <= current_time and self.first_sample is not True:
                 self.log(" start - Device Defender telemetry delay {}".format(self._device_metrics_sampling_delay))
                 device_defender_metrics_topic = self.mqtt_device_defender_telemetry_topic.format(self.name)
                 self.device_defender_metrics_payload = self.collect_metrics()
                 self.log(" start - Sending to '{}' the payload below\n{}".format(device_defender_metrics_topic, self.device_defender_metrics_payload.to_json_string()))
                 self._mqtt_client.publish(device_defender_metrics_topic, self.device_defender_metrics_payload.to_json_string(),0)
                 self._next_device_defender_telemetry = current_time + datetime.timedelta(0, self._device_metrics_sampling_delay)
+            
+            self.first_sample = False
 
             if self._pending_payloads:
                 try:

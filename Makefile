@@ -9,15 +9,12 @@ update-cdk:
 	cd cdk && source .env/bin/activate && pip install --upgrade aws-cdk.core;
 
 deploy-stack:
-	cd cdk && source .env/bin/activate && cdk deploy iot-playground codepipeline --require-approval never;
+	cd cdk && source .env/bin/activate && cdk deploy iot-playground codepipeline devicedefender --require-approval never;
 
 deploy-cdk-bootstrap:
 	# aws sts get-caller-identity --query "Account" --output text >> .iot-playground.cfg
 	# cd cdk && source .env/bin/activate && cdk bootstrap "aws://$ACC_ID/us-east-1";
 	./scripts/deploy-bootstrap.sh
-
-destroy-stack:
-	cd cdk && source .env/bin/activate && cdk destroy iot-playground codepipeline --require-approval never;
 
 lint:
 	@echo "\n${BLUE}Running Pylint against source and test files...${NC}\n"
