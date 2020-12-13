@@ -7,7 +7,11 @@ import os
 import sys
 import random
 import string
+import psutil as ps
 from enum import Enum
+import metrics
+import socket
+
 
 if sys.version[0:1] == '3':
     import urllib.request as urllib
@@ -17,6 +21,8 @@ else:
 
 DEFAULT_MQTT_PORT = 8883
 DEFAULT_SAMPLING_DELAY = 60
+## 300 (5 minutes) is the Default Device Metrics sampling best-practice, more frequent than this and you get throttled
+DEFAULT_DEVICE_METRICS_SAMPLING_DELAY = 300
 LOG_SIZE = 15000
 
 
@@ -35,7 +41,9 @@ class VirtualDevice:
 
     _stop = False
     _sampling_delay = DEFAULT_SAMPLING_DELAY
+    _device_metrics_sampling_delay = DEFAULT_DEVICE_METRICS_SAMPLING_DELAY
     _next_message_time = datetime.datetime.now()
+    _next_device_defender_telemetry = datetime.datetime.now()
     _mqtt_client = None
     _lwt_topic = None
     _lwt_message = None
@@ -49,6 +57,8 @@ class VirtualDevice:
     name = "name"
     mqtt_port = DEFAULT_MQTT_PORT
     mqtt_telemetry_topic = "dt/ac/company1/area1/{}/temp"
+    mqtt_device_defender_telemetry_topic = "$aws/things/{}/defender/metrics/json"
+
     shadow = {}
     unit = "metric" # "imperial"
     payload = { "temp" : 30 }
@@ -63,16 +73,19 @@ class VirtualDevice:
         self.log("New virtual device...")
         self.log("CLIENT_ID: '{}'".format(name))
         self.log("ENDPOINT : '{}'".format(endpoint))
+        ## The Device Defender scripts were written starting from: https://github.com/aws-samples/aws-iot-device-defender-agent-sdk-python/blob/master/AWSIoTDeviceDefenderAgentSDK/collector.py
+        # Keep a copy of the last metric, if there is one, so we can calculate change in some metrics.
+        self._last_metric = None
+        
 
-
-    # Logging method to print on stdout and store in memory for browser consumption
+        # Logging method to print on stdout and store in memory for browser consumption
     def log(self, msg):
         ts = datetime.datetime.utcnow().isoformat()
         msg_formatted = "{} - {}".format(ts, str(msg))
 
         print(msg_formatted)
         self._log.push(msg_formatted)
-
+    
 
     def log_enter_callback(self, function_name, payload, topic, qos):
         self.log(">{} - Received message '{}' on topic '{}' with QoS {}".format(function_name, str(payload), topic, str(qos)))
@@ -90,6 +103,13 @@ class VirtualDevice:
 
         return
 
+    def set_device_metrics_sampling_delay(self, device_metrics_sampling_delay):
+        self.log(">set_device_metrics_sampling_delay '{}'".format(device_metrics_sampling_delay))
+
+        self._device_metrics_sampling_delay = device_metrics_sampling_delay
+        self._next_device_defender_telemetry = datetime.datetime.now()
+
+        return
 
     def force_reconnect(self):
         self._force_reconnect = True
@@ -638,6 +658,14 @@ class VirtualDevice:
                 self._mqtt_client.publish(topic, json.dumps(self.payload), 0)
                 self._next_message_time = current_time + datetime.timedelta(0, self._sampling_delay)
 
+            if self._next_device_defender_telemetry <= current_time:
+                self.log(" start - Device Defender telemetry delay {}".format(self._device_metrics_sampling_delay))
+                device_defender_metrics_topic = self.mqtt_device_defender_telemetry_topic.format(self.name)
+                self.device_defender_metrics_payload = self.collect_metrics()
+                self.log(" start - Sending to '{}' the payload below\n{}".format(device_defender_metrics_topic, self.device_defender_metrics_payload.to_json_string()))
+                self._mqtt_client.publish(device_defender_metrics_topic, self.device_defender_metrics_payload.to_json_string(),0)
+                self._next_device_defender_telemetry = current_time + datetime.timedelta(0, self._device_metrics_sampling_delay)
+
             if self._pending_payloads:
                 try:
                     p = self._pending_payloads.pop()
@@ -672,6 +700,73 @@ class VirtualDevice:
         self._lwt_message = message
 
         return ""
+    
+    @staticmethod
+    def __get_interface_name(address):
+
+        if address == '0.0.0.0' or address == '::':
+            return address
+
+        for iface in ps.net_if_addrs():
+            for snic in ps.net_if_addrs()[iface]:
+                if snic.address == address:
+                    return iface
+
+    def listening_ports(self, metrics):
+        """
+        Iterate over all inet connections in the LISTEN state and extract port and interface.
+        """
+        udp_ports = []
+        tcp_ports = []
+        for conn in ps.net_connections(kind='inet'):
+            iface = self.__get_interface_name(conn.laddr.ip)
+            if conn.status == "LISTEN" and conn.type == socket.SOCK_STREAM:
+                if iface:
+                    tcp_ports.append({'port': conn.laddr.port, 'interface': iface})
+                else:
+                    tcp_ports.append({'port': conn.laddr.port})
+            if conn.type == socket.SOCK_DGRAM:  # on Linux, udp socket status is always "NONE"
+                if iface:
+                    udp_ports.append({'port': conn.laddr.port, 'interface': iface})
+                else:
+                    udp_ports.append({'port': conn.laddr.port})
+
+        metrics.add_listening_ports("UDP", udp_ports)
+        metrics.add_listening_ports("TCP", tcp_ports)
+
+    @staticmethod
+    def network_stats(metrics):
+        net_counters = ps.net_io_counters(pernic=False)
+        metrics.add_network_stats(
+            net_counters.bytes_recv,
+            net_counters.packets_recv,
+            net_counters.bytes_sent,
+            net_counters.packets_sent)
+
+    @staticmethod
+    def network_connections(metrics):
+        protocols = ['tcp']
+        for protocol in protocols:
+            for c in ps.net_connections(kind=protocol):
+                try:
+                    if c.status == "ESTABLISHED" or c.status == "BOUND":
+                        metrics.add_network_connection(c.raddr.ip, c.raddr.port,
+                                                       VirtualDevice.__get_interface_name(c.laddr.ip),
+                                                       c.laddr.port)
+                except Exception as ex:
+                    print('Failed to parse network info for protocol: ' + protocol)
+                    print(ex)
+
+    def collect_metrics(self):
+        """Sample system metrics and populate a metrics object suitable for publishing to Device Defender."""
+        metrics_current = metrics.Metrics(last_metric=self._last_metric)
+
+        self.network_stats(metrics_current)
+        self.listening_ports(metrics_current)
+        self.network_connections(metrics_current)
+
+        self._last_metric = metrics_current
+        return metrics_current
 
 
 class VirtualSwitch(VirtualDevice):

@@ -140,3 +140,7 @@ cdk.out/
 
 # Device stuff
 dev-*
+
+virtual-device/local/*
+!virtual-device/local/README.md
+!virtual-device/local/config-sample.json

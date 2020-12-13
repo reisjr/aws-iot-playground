@@ -31,10 +31,10 @@ It may take a while (few minutes) to go through the pipeline and create the dock
 while [ 1 ]; do aws ecr list-images --repository-name iot-playground; sleep 5; done;
 ```
 
-Run the following command to call the device-factory API and provision your first device.
+Run the following command to call the device-factory API and provision your first device. Substitute "generic" with your selected Device Type
 
 ```
-./scripts/cp-create-thing.sh
+./scripts/cp-create-thing.sh generic
 {"dev_name": "dev-QAUE", "endpoint": "XXXXXXXXX-ats.iot.us-east-2.amazonaws.com", "task_arn": "arn:aws:ecs:us-east-2:123456789012:task/15f52c80-33c7-4cf5-ab3d-5da91708fad6", "cluster_arn": "arn:aws:ecs:us-east-2:123456789012:cluster/iot-playground-DeviceCluster8AF64519-Gn0kJDxJZ2RP", "config_file_url": "https://iot-playground-086464235113-us-east-2.s3.amazonaws.com/dev-QAUE.cfg?...", "result": "OK"}
 ```
 
