@@ -22,7 +22,7 @@ else:
 DEFAULT_MQTT_PORT = 8883
 DEFAULT_SAMPLING_DELAY = 60
 ## 300 (5 minutes) is the Default Device Metrics sampling best-practice, more frequent than this and you get throttled
-DEFAULT_DEVICE_METRICS_SAMPLING_DELAY = 300
+DEFAULT_DEVICE_METRICS_SAMPLING_DELAY = 5
 LOG_SIZE = 15000
 
 
@@ -667,7 +667,9 @@ class VirtualDevice:
                 self._mqtt_client.publish(device_defender_metrics_topic, self.device_defender_metrics_payload.to_json_string(),0)
                 self._next_device_defender_telemetry = current_time + datetime.timedelta(0, self._device_metrics_sampling_delay)
             
-            self.first_sample = False
+            if self.first_sample is True:
+                self.collect_metrics()
+                self.first_sample = False
 
             if self._pending_payloads:
                 try:
