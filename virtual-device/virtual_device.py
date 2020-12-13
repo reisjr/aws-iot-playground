@@ -22,7 +22,7 @@ else:
 DEFAULT_MQTT_PORT = 8883
 DEFAULT_SAMPLING_DELAY = 60
 ## 300 (5 minutes) is the Default Device Metrics sampling best-practice, more frequent than this and you get throttled
-DEFAULT_DEVICE_METRICS_SAMPLING_DELAY = 5
+DEFAULT_DEVICE_METRICS_SAMPLING_DELAY = 300
 LOG_SIZE = 15000
 
 
