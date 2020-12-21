@@ -1,0 +1,9 @@
+{
+  "iot_endpoint": "{your-endpoint}-ats.iot.{region}.amazonaws.com",
+  "device_name": "{sample-name}",
+  "cert": "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----",
+  "root_ca": "-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----",
+  "key": "-----BEGIN RSA PRIVATE KEY-----...-----END RSA PRIVATE KEY-----",
+  "device-type": "generic",
+  "controlled-device": ""
+}

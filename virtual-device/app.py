@@ -118,8 +118,8 @@ def create_app(cfg_file):
         data = ""
         global vd
 
-        if "time" in request.args and request.args.get("time"):
-            time = request.args.get('time')
+        if (request.args.get('time') or (request.form.get('fsampling') != '' and request.form.get('fsampling') is not None)):
+            time = request.args.get('time') or request.form.get('fsampling')
             print("Changing time to '{}'...".format(time))
 
             try:
@@ -129,8 +129,19 @@ def create_app(cfg_file):
                 print(e)
                 data = e
 
-        if "topic" in request.args and request.args.get("topic"):
-            topic = request.args.get('topic')
+        if (request.args.get('ddm_sr') or (request.form.get('ddm_sr') != '' and request.form.get('ddm_sr') is not None)):
+            device_metrics_time = request.args.get('ddm_sr') or request.form.get('ddm_sr')
+            print("Changing Device Metrics topic to '{}'...".format(device_metrics_time))
+
+            try:
+                vd.set_device_metrics_sampling_delay(int(device_metrics_time))
+                data = str(device_metrics_time)
+            except Exception as e:
+                print(e)
+                data = e        
+
+        if (request.args.get('topic') or (request.form.get('ftopic') != '' and request.form.get('ftopic') is not None)):
+            topic = request.args.get('topic') or request.form.get('ftopic')
             print("Changing topic to '{}'...".format(topic))
 
             try:
@@ -140,8 +151,8 @@ def create_app(cfg_file):
                 print(e)
                 data = e
         
-        if "payload" in request.args and request.args.get("payload"):
-            payload = request.args.get("payload")
+        if (request.args.get('payload') or (request.form.get('fpayload') != '' and request.form.get('fpayload') is not None)):
+            payload = request.args.get("payload") or request.form.get('fpayload')
             try:
                 p = json.loads(payload)
                 vd.payload = p
@@ -306,7 +317,11 @@ if __name__ == '__main__':
     else:
         import urllib as urllib
 
-    response = urllib.urlopen(os.environ['CONFIG_FILE_URL'])
+    if os.environ.get('DEBUG') == 'true':
+        response = open("{}/local/config.json".format(os.path.dirname(os.path.realpath(__file__))), "r")
+    else:
+        response = urllib.urlopen(os.environ.get('CONFIG_FILE_URL'))
+    
     cfg_file = json.loads(response.read())
 
     app = create_app(cfg_file)

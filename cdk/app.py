@@ -5,7 +5,7 @@ from aws_cdk import core
 from iot_playground.iot_playground_stack import IotPlaygroundStack
 from iot_playground.code_pipeline_stack import CodePipelineStack
 # from iot_playground.control_plane_stack import ControlPlaneStack
-# from iot_playground.device_defender_stack import DeviceDefenderStack
+from iot_playground.device_defender_stack import DeviceDefenderStack
 
 props = {'namespace': 'iot-playground'}
 
@@ -13,6 +13,6 @@ app = core.App()
 base = IotPlaygroundStack(app, "iot-playground", props)
 CodePipelineStack(app, "codepipeline", base.outputs)
 # ControlPlaneStack(app, "control-plane", base.outputs)
-# DeviceDefenderStack(app, "devicedefender", base.outputs)
+DeviceDefenderStack(app, "devicedefender", base.outputs)
 
 app.synth()
